@@ -5,3 +5,5 @@ export const getCompanies = ({ companiesList: state }: RootState) =>
 
 export const getCheckedCompanies = ({ companiesList: state }: RootState) =>
   state.checked;
+
+export const getLimit = ({ companiesList: state }: RootState) => state.limit;

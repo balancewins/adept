@@ -1,5 +1,5 @@
-import { memo, useCallback, useEffect, useMemo, useRef } from "react";
-import { getCheckedCompanies, getCompanies } from "./selectors";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getCheckedCompanies, getCompanies, getLimit } from "./selectors";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import {
   clearSlice,
@@ -15,31 +15,64 @@ export const CompaniesList = memo(() => {
   const dispatch = useAppDispatch();
   const companies: ICompany[] = useAppSelector(getCompanies);
   const checked: string[] = useAppSelector(getCheckedCompanies);
+  const limit: number = useAppSelector(getLimit);
+  const [visibleLimit, setVisibleLimit] = useState<number>(5 * limit);
   const tableRef = useRef<HTMLTableElement>(null);
 
   useEffect(() => {
     getNextCompany();
     tableRef?.current &&
-      tableRef.current.addEventListener("scroll", handleScroll);
+      tableRef.current.addEventListener("scroll", handleDownScroll);
 
     return () => {
       dispatch(clearSlice());
-      tableRef.current?.removeEventListener("scroll", handleScroll);
+      tableRef?.current?.removeEventListener("scroll", handleDownScroll);
     };
   }, []);
 
+  useEffect(() => {
+    tableRef?.current &&
+      tableRef.current.addEventListener("scroll", handleUpScroll);
+
+    return () => {
+      tableRef?.current?.removeEventListener("scroll", handleUpScroll);
+    };
+  }, [companies.length]);
+
   const getNextCompany = useCallback(() => dispatch(getCompaniesList()), []);
 
-  const handleScroll = useCallback((): void => {
+  const handleDownScroll = useCallback((): void => {
     if (tableRef?.current) {
       if (
         tableRef.current.scrollTop + tableRef.current.clientHeight >=
         tableRef.current.scrollHeight - 20
       ) {
         getNextCompany();
+        setVisibleLimit(200);
       }
     }
-  }, []);
+  }, [companies.length]);
+
+  const handleUpScroll = useCallback((): void => {
+    if (tableRef?.current) {
+      if (
+        tableRef.current.scrollTop < 200 &&
+        companies.length >= visibleLimit
+      ) {
+        setVisibleLimit((prevState) => prevState + limit);
+      }
+    }
+  }, [companies.length, limit, visibleLimit]);
+
+  /* Поскольку по ТЗ требовалось сделать оптимизацию на большие таблицы без использования сторонних библиотек,
+   * придумал подобный трюк. В противном случае использовал бы react-window для виртуализации длинных списков */
+  const visibleCompanies: ICompany[] = useMemo(
+    () =>
+      companies.length >= visibleLimit
+        ? companies.slice(-visibleLimit)
+        : companies,
+    [companies.length, visibleLimit],
+  );
 
   const isAllChecked: boolean = useMemo(
     () => checked.length === companies.length,
@@ -73,7 +106,7 @@ export const CompaniesList = memo(() => {
         </tr>
       </thead>
       <tbody>
-        {companies.map((company: ICompany) => (
+        {visibleCompanies.map((company: ICompany) => (
           <Company key={company.id} company={company} />
         ))}
       </tbody>
