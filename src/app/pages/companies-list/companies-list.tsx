@@ -65,7 +65,8 @@ export const CompaniesList = memo(() => {
   }, [companies.length, limit, visibleLimit]);
 
   /* Поскольку по ТЗ требовалось сделать оптимизацию на большие таблицы без использования сторонних библиотек,
-   * придумал подобный трюк. В противном случае использовал бы react-window для виртуализации длинных списков */
+   * придумал подобный трюк. В противном случае использовал бы react-window для виртуализации длинных списков.
+   * https://react-window.vercel.app/ */
   const visibleCompanies: ICompany[] = useMemo(
     () =>
       companies.length >= visibleLimit
