@@ -53,6 +53,17 @@ export const companiesListSlice = createSlice({
           ? []
           : state.companies.map((company: ICompany) => company.id);
     },
+    editCompany: (state, action: PayloadAction<ICompany>) => {
+      const index: number = Number(action.payload.id);
+
+      state.companies = [
+        ...state.companies.slice(0, index),
+        {
+          ...action.payload,
+        },
+        ...state.companies.slice(index + 1),
+      ];
+    },
     handleChangeDeleteCompanies: (state, action: PayloadAction<string[]>) => {
       state.companies = state.companies.filter(
         (company: ICompany) => !action.payload.includes(company.id),
@@ -67,6 +78,7 @@ export const companiesListSlice = createSlice({
 });
 
 export const {
+  editCompany,
   handleChangeCheck,
   handleChangeDeleteCompanies,
   toggleCheckAll,
