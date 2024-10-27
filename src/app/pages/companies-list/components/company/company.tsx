@@ -1,4 +1,14 @@
-import { ChangeEvent, KeyboardEvent, FC, memo, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  KeyboardEvent,
+  FC,
+  memo,
+  useMemo,
+  useState,
+  KeyboardEventHandler,
+  MouseEventHandler,
+  MouseEvent,
+} from "react";
 import { useAppDispatch, useAppSelector } from "../../../../hooks";
 import { getCheckedCompanies, getCompanies } from "../../selectors";
 import {
@@ -15,8 +25,8 @@ type Props = {
 
 export const Company: FC<Props> = memo(({ company }) => {
   const dispatch = useAppDispatch();
-  const checked: string[] = useAppSelector(getCheckedCompanies);
-  const companies: ICompany[] = useAppSelector(getCompanies);
+  const checked = useAppSelector(getCheckedCompanies);
+  const companies = useAppSelector(getCompanies);
   const [name, setName] = useState<string>(company.name);
   const [address, setAddress] = useState<string>(company.address);
 
@@ -25,15 +35,20 @@ export const Company: FC<Props> = memo(({ company }) => {
     [checked],
   );
 
-  const deleteCompany = (): void => {
+  const deleteCompany: MouseEventHandler<HTMLButtonElement> = (
+    e: MouseEvent<HTMLButtonElement>,
+  ): void => {
+    e.preventDefault();
     dispatch(handleChangeDeleteCompanies([company.id]));
     if (companies.length === 1) {
       dispatch(getCompaniesList());
     }
   };
 
-  // Для оптимизации сохранение в store по enter, а не при каждом изменении в input
-  const saveCompany = (e: KeyboardEvent<HTMLInputElement>): void => {
+  // Для оптимизации сохранение в store по enter, а не при каждом изменении value в input
+  const saveCompany: KeyboardEventHandler<HTMLInputElement> = (
+    e: KeyboardEvent<HTMLInputElement>,
+  ): void => {
     if (e.key === "Enter") {
       dispatch(editCompany({ id: company.id, name, address }));
     }
@@ -54,7 +69,7 @@ export const Company: FC<Props> = memo(({ company }) => {
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setName(e.target.value)
           }
-          onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => saveCompany(e)}
+          onKeyDown={saveCompany}
         />
       </td>
       <td>
@@ -63,7 +78,7 @@ export const Company: FC<Props> = memo(({ company }) => {
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setAddress(e.target.value)
           }
-          onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => saveCompany(e)}
+          onKeyDown={saveCompany}
         />
       </td>
       <td>

@@ -1,4 +1,12 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FC,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { getCheckedCompanies, getCompanies, getLimit } from "./selectors";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import {
@@ -11,31 +19,29 @@ import { ICompany } from "./types";
 import { Company } from "./components";
 import "./companies-list.css";
 
-export const CompaniesList = memo(() => {
+export const CompaniesList: FC = memo(() => {
   const dispatch = useAppDispatch();
-  const companies: ICompany[] = useAppSelector(getCompanies);
-  const checked: string[] = useAppSelector(getCheckedCompanies);
-  const limit: number = useAppSelector(getLimit);
+  const companies = useAppSelector(getCompanies);
+  const checked = useAppSelector(getCheckedCompanies);
+  const limit = useAppSelector(getLimit);
   const [visibleLimit, setVisibleLimit] = useState<number>(5 * limit);
   const tableRef = useRef<HTMLTableElement>(null);
 
   useEffect(() => {
     getNextCompany();
-    tableRef?.current &&
-      tableRef.current.addEventListener("scroll", handleDownScroll);
+    tableRef.current?.addEventListener("scroll", handleDownScroll);
 
     return () => {
       dispatch(clearSlice());
-      tableRef?.current?.removeEventListener("scroll", handleDownScroll);
+      tableRef.current?.removeEventListener("scroll", handleDownScroll);
     };
   }, []);
 
   useEffect(() => {
-    tableRef?.current &&
-      tableRef.current.addEventListener("scroll", handleUpScroll);
+    tableRef.current?.addEventListener("scroll", handleUpScroll);
 
     return () => {
-      tableRef?.current?.removeEventListener("scroll", handleUpScroll);
+      tableRef.current?.removeEventListener("scroll", handleUpScroll);
     };
   }, [companies.length]);
 
@@ -43,10 +49,9 @@ export const CompaniesList = memo(() => {
 
   const handleDownScroll = useCallback((): void => {
     if (tableRef?.current) {
-      if (
-        tableRef.current.scrollTop + tableRef.current.clientHeight >=
-        tableRef.current.scrollHeight - 20
-      ) {
+      const el: HTMLTableElement = tableRef.current;
+
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
         getNextCompany();
         setVisibleLimit(200);
       }

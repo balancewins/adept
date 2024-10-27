@@ -1,8 +1,9 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
-import companiesListReducers, {
+import {
+  companiesListReducers,
   initialState as companiesListInitialState,
-} from "../pages/companies-list/companies-list-slice";
+} from "../pages/companies-list";
 
 export const rootReducer = combineReducers({
   companiesList: companiesListReducers,
